@@ -1,1 +1,80 @@
+import random
 
+print("Group Maker 3000")
+
+# class list with 20 students
+classList = [
+    "Alice", "Bob", "Charlie", "David", "Eva",
+    "Frank", "Grace", "Henry", "Isabella", "Jack",
+    "Kathy", "Liam", "Mia", "Noah", "Olivia",
+    "Peter", "Quinn", "Rachel", "Steve", "Tina"
+]
+
+# ask for group size
+while True:
+    try:
+        group_size = int(input("Enter group size (2, 3, or 4): "))
+        if group_size in [2, 3, 4]:
+            break
+        else:
+            print("Invalid choice. Please enter 2, 3, or 4.")
+    except ValueError:
+        print("Please enter a number.")
+
+# get exceptions (people who shouldn't be together)
+exceptions = set()
+print("\nEnter exceptions (students who should NOT be together).")
+print("Enter in format 'Student1,Student2'. Type 'done' when finished.")
+
+while True:
+    entry = input("Exception pair: ").strip()
+    if entry.lower() == 'done':
+        break
+    try:
+        s1, s2 = map(str.strip, entry.split(","))
+        if s1 in classList and s2 in classList:
+            exceptions.add((s1, s2))
+        else:
+            print("One or both names are not in the class list.")
+    except ValueError:
+        print("Invalid format. Use: Student1,Student2")
+
+# check if adding a student breaks the rules
+def violates_exception(group, student, exceptions):
+    for member in group:
+        if (student, member) in exceptions or (member, student) in exceptions:
+            return True
+    return False
+
+# function to make the groups
+def make_groups(students, group_size, exceptions):
+    students = students.copy()
+    random.shuffle(students)
+    groups = []
+
+    while students:
+        group = []
+        for i in range(group_size):
+            if not students:
+                break
+
+            # try to find a student who doesn't break any rules
+            for student in students:
+                if not violates_exception(group, student, exceptions):
+                    group.append(student)
+                    students.remove(student)
+                    break
+            else:
+                # shuffle and try again if stuck
+                random.shuffle(students)
+        groups.append(group)
+
+    return groups
+
+# create the groups
+groups = make_groups(classList, group_size, exceptions)
+
+# show the results
+print("\nGroups:")
+for i, group in enumerate(groups, 1):
+    print(f"Group {i}: {group}")
